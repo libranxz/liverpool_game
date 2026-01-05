@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
-# --- 配置区 ---
+# --- Configuration ---
 API_TOKEN = os.getenv('FOOTBALL_API_TOKEN')
 if not API_TOKEN:
     raise ValueError("FOOTBALL_API_TOKEN not found in environment variables. Please create a .env file with your API token.")
@@ -40,34 +40,34 @@ def get_matches():
                     elif home_id in BIG_CLUBS and away_id in BIG_CLUBS:
                         all_selected_matches.append(m)
             else:
-                print(f"无法获取联赛 {comp} 的数据: {response.status_code}")
+                print(f"Failed to fetch data for competition {comp}: {response.status_code}")
         except Exception as e:
-            print(f"网络错误: {e}")
+            print(f"Network error: {e}")
             
     return all_selected_matches
 
 def create_ics(matches):
     cal = Calendar()
-    # 增加 X-WR-CALNAME 属性，方便导入时自动命名日历分类
-    cal.add('x-wr-calname', '利物浦 & 欧洲强强对话')
+    # Add X-WR-CALNAME property for automatic calendar naming when importing
+    cal.add('x-wr-calname', 'Liverpool & European Big Games')
     cal.add('prodid', '-//Liverpool & Big Games Calendar//mx//')
     cal.add('version', '2.0')
 
-    # 获取当前时间，作为事件更新的依据
+    # Get current time as basis for event updates
     now = datetime.datetime.now(pytz.utc)
 
     for m in matches:
         event = Event()
         
-        # --- 核心修复：防止重复 ---
-        # 1. 使用比赛唯一的 ID 作为 UID，这是去重的关键
+        # --- Core fix: prevent duplicates ---
+        # 1. Use unique match ID as UID, this is key for deduplication
         match_id = str(m['id'])
         event.add('uid', f"football_match_{match_id}@gemini_script")
         
-        # 2. 添加 DTSTAMP（创建/更新时间戳）
+        # 2. Add DTSTAMP (creation/update timestamp)
         event.add('dtstamp', now)
         
-        # 3. 添加 SEQUENCE（序列号），如果比赛时间变了，日历会根据这个更新
+        # 3. Add SEQUENCE (sequence number), if match time changes, calendar will update based on this
         event.add('sequence', int(now.timestamp()))
         # ------------------------
 
@@ -86,7 +86,7 @@ def create_ics(matches):
 
     with open('football_schedule.ics', 'wb') as f:
         f.write(cal.to_ical())
-    print(f"成功更新！共计 {len(matches)} 场比赛。")
+    print(f"Successfully updated! Total of {len(matches)} matches.")
 
 if __name__ == "__main__":
     matches = get_matches()

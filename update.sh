@@ -1,33 +1,33 @@
 #!/bin/bash
 
-# 获取脚本所在的当前目录
+# Get the directory where the script is located
 cd "$(dirname "$0")"
 
-echo "--- 正在启动利物浦赛程更新程序 ---"
+echo "--- Starting Liverpool schedule update program ---"
 
-# 1. 如果没有 venv 文件夹，则创建一个
+# 1. If venv folder doesn't exist, create one
 if [ ! -d ".venv" ]; then
-    echo "创建虚拟环境..."
+    echo "Creating virtual environment..."
     python3 -m venv .venv
 fi
 
-# 2. 激活虚拟环境
+# 2. Activate virtual environment
 source .venv/bin/activate
 
-# 3. 确保安装了必要的库 (每次运行检查一下，确保环境正常)
-echo "正在检查依赖库..."
+# 3. Ensure necessary libraries are installed (check each run to ensure environment is OK)
+echo "Checking dependencies..."
 pip install -q requests icalendar pytz python-dotenv
 
-# 4. 运行 Python 脚本
-echo "正在获取最新比赛信息并生成日历..."
+# 4. Run Python script
+echo "Fetching latest match information and generating calendar..."
 python3 football_cal.py
 
-# 5. 自动用 Mac 日历打开生成的 .ics 文件
+# 5. Automatically open generated .ics file with Mac Calendar
 if [ -f "football_schedule.ics" ]; then
-    echo "成功！正在导入 Mac 日历..."
+    echo "Success! Importing to Mac Calendar..."
     open football_schedule.ics
 else
-    echo "错误：未能生成 .ics 文件，请检查 API Token 或网络。"
+    echo "Error: Failed to generate .ics file, please check API Token or network."
 fi
 
-echo "--- 更新完成 ---"
+echo "--- Update complete ---"
